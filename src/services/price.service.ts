@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
+import { AssetType } from '../models/asset.model'; // adapte le chemin
 
 @Injectable({ providedIn: 'root' })
 export class PriceService {
   // Ici tu branchera tes vraies API REST
-  async fetchPrice(symbol: string, type: AssetType): Promise<number> {
+    async fetchPrice(symbol: string, type: AssetType): Promise<number> {
     // MOCK - remplace par tes webservices
     const mocks: Record<string, number> = {
       'AIR.PA': 182.5, 'BTC': 61200, 'ETH': 3200, 'EUR/USD': 1.08
