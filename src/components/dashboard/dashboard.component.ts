@@ -44,16 +44,24 @@ import { SheetService } from '../../services/sheet.service';
         </div>
         <div class="border bg-white p-6">
             <div class="text-xs uppercase text-[#94A3B8] mb-4">Actifs</div>
-                @for (a of kpis().assets; track a.symbol) {
-                    <div class="flex justify-between text-sm py-2 border-b border-[#F1F5F9]">
-                        <div>
-                            <div class="capitalize">{{ a.name }}</div>
-                            @if(a.reward>0){
-                            <div class="text-[11px] text-green-600">+{{ a.annualGain | number:'1.0-0' }} € / an ({{ a.reward | number:'1.1-1' }}%)</div>
-                            }
-                        </div>
-                        <span class="font-mono">{{ a.total | number:'1.0-0' }} {{ a.currency }}</span>
+                @for (a of kpis().assets; track $index) {
+                <div class="flex justify-between py-3 border-b border-[#F1F5F9] last:border-0">
+                    <!-- GAUCHE : nom + reward -->
+                    <div class="pr-4">
+                    <div class="capitalize leading-tight text-sm">{{ a.name }}</div>
+                    @if(a.reward>0){
+                        <div class="text-[11px] text-green-600 mt-0.5">+{{ a.annualGain | number:'1.0-0' }} € / an ({{ a.reward | number:'1.1-1' }}%)</div>
+                    }
                     </div>
+
+                    <!-- DROITE : valeur + gain/perte -->
+                    <div class="text-right">
+                    <div class="font-mono text-[13px] leading-tight">{{ a.total | number:'1.0-0' }} {{ a.currency }}</div>
+                    <div class="text-[11px] mt-0.5" [class.text-green-600]="a.perfValue>=0" [class.text-red-600]="a.perfValue<0">
+                        {{ a.perfValue>=0?'+':'' }}{{ a.perfValue | number:'1.0-0' }} € ({{ a.perfPercent | number:'1.0-0' }}%)
+                    </div>
+                    </div>
+                </div>
                 }
         </div>
     </div>
