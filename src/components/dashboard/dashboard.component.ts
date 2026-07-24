@@ -56,7 +56,7 @@ import { SheetService } from '../../services/sheet.service';
 
                     <!-- DROITE : valeur + gain/perte -->
                     <div class="text-right">
-                    <div class="font-mono text-[13px] leading-tight">{{ a.total | number:'1.0-0' }} {{ a.currency }}</div>
+                    <div class="font-mono text-[13px] leading-tight">{{ a.total | number:'1.0-0' }} €</div>
                     <div class="text-[11px] mt-0.5" [class.text-green-600]="a.perfValue>=0" [class.text-red-600]="a.perfValue<0">
                         {{ a.perfValue>=0?'+':'' }}{{ a.perfValue | number:'1.0-0' }} € ({{ a.perfPercent | number:'1.0-0' }}%)
                     </div>
