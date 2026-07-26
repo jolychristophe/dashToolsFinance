@@ -14,28 +14,43 @@ export class PortfolioService {
     });
   }
 
-  kpis = computed(()=>{
-    const assets = this.holdings();
-    const totalValue = assets.reduce((s,a)=> s + a.total, 0);
-    const totalBuy = assets.reduce((s,a)=> s + (a.quantity * a.buyPrice), 0);
-    const totalAnnualReward = assets.reduce((s,a)=> s + a.annualGain, 0);
+kpis = computed(()=>{
+  const assets = this.holdings();
+  const totalValue = assets.reduce((s,a)=> s + a.total, 0);
+  const totalBuy = assets.reduce((s,a)=> s + a.buyTotalEur, 0);
+  const totalAnnualReward = assets.reduce((s,a)=> s + a.annualGain, 0);
 
-    const byType = assets.reduce((acc: Record<string,number>, a)=>{
-      acc[a.type] = (acc[a.type]??0) + a.total;
-      return acc;
-    },{});
+  const map = new Map<string, any>();
+  for(const a of assets){
+    if(!map.has(a.type)) map.set(a.type, { type: a.type, assets: [], totalValue:0, buyTotal:0, annualReward:0 });
+    const g = map.get(a.type);
+    g.assets.push(a);
+    g.totalValue += a.total;
+    g.buyTotal += a.buyTotalEur;
+    g.annualReward += a.annualGain;
+  }
 
+  const groups = Array.from(map.values()).map(g=>{
+    const perfValue = g.totalValue - g.buyTotal;
     return {
-      totalValue,
-      perfValue: totalValue - totalBuy,
-      perfPercent: totalBuy ? (totalValue-totalBuy)/totalBuy*100 : 0,
-      totalAnnualReward,
-      totalMensualReward: totalAnnualReward / 12,
-      passiveYield: totalValue ? totalAnnualReward/totalValue*100 : 0,
-      exposureByType: Object.entries(byType)
-        .map(([type,value])=>({type,value}))
-        .sort((a,b)=> b.value - a.value),
-      assets: [...assets].sort((a,b)=> b.total - a.total)
+     ...g,
+      assets: g.assets.sort((a:any,b:any)=> b.total - a.total),
+      perfValue,
+      perfPercent: g.buyTotal? perfValue/g.buyTotal*100 : 0,
+      yield: g.totalValue? g.annualReward/g.totalValue*100 : 0
     };
-  });
+  }).sort((a,b)=> b.totalValue - a.totalValue);
+
+  return {
+    totalValue,
+    perfValue: totalValue - totalBuy,
+    perfPercent: totalBuy? (totalValue-totalBuy)/totalBuy*100 : 0,
+    totalAnnualReward,
+    totalMensualReward: totalAnnualReward / 12,
+    passiveYield: totalValue? totalAnnualReward/totalValue*100 : 0,
+    groups,
+    exposureByType: groups.map(g=>({label:g.type, value:g.totalValue})),
+    assets: [...assets].sort((a,b)=> b.total - a.total)
+  };
+});
 }

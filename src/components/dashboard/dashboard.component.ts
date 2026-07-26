@@ -42,28 +42,47 @@ import { SheetService } from '../../services/sheet.service';
             <div class="text-xs uppercase text-[#94A3B8] mb-4">Allocation</div>
             <app-allocation-chart [data]="allocationData()" [total]="kpis().totalValue" />
         </div>
-        <div class="border bg-white p-6">
-            <div class="text-xs uppercase text-[#94A3B8] mb-4">Actifs</div>
-                @for (a of kpis().assets; track $index) {
-                <div class="flex justify-between py-3 border-b border-[#F1F5F9] last:border-0">
-                    <!-- GAUCHE : nom + reward -->
-                    <div class="pr-4">
-                    <div class="capitalize leading-tight text-sm">{{ a.name }}</div>
-                    @if(a.reward>0){
-                        <div class="text-[11px] text-green-600 mt-0.5">+{{ a.annualGain | number:'1.0-0' }} € / an ({{ a.reward | number:'1.1-1' }}%)</div>
-                    }
-                    </div>
 
-                    <!-- DROITE : valeur + gain/perte -->
-                    <div class="text-right">
-                    <div class="font-mono text-[13px] leading-tight">{{ a.total | number:'1.0-0' }} €</div>
-                    <div class="text-[11px] mt-0.5" [class.text-green-600]="a.perfValue>=0" [class.text-red-600]="a.perfValue<0">
-                        {{ a.perfValue>=0?'+':'' }}{{ a.perfValue | number:'1.0-0' }} € ({{ a.perfPercent | number:'1.0-0' }}%)
-                    </div>
-                    </div>
-                </div>
+        <div class="border bg-white p-6">
+        <div class="text-xs uppercase text-[#94A3B8] mb-4">Actifs</div>
+
+        @for (g of kpis().groups; track g.type) {
+            <!-- HEADER GROUPE -->
+            <div class="flex justify-between items-start py-3 border-b-2 border-black mt-4 first:mt-0">
+            <div>
+                <div class="text-sm font-bold uppercase tracking-wide">{{ g.type }}</div>
+                @if(g.annualReward>0){
+                <div class="text-[11px] text-green-600 mt-0.5">+{{ g.annualReward | number:'1.0-0' }} € / an ({{ g.yield | number:'1.1-1' }}%)</div>
                 }
+            </div>
+            <div class="text-right">
+                <div class="font-mono text-sm font-bold">{{ g.totalValue | number:'1.0-0' }} €</div>
+                <div class="text-[11px] mt-0.5" [class.text-green-600]="g.perfValue>=0" [class.text-red-600]="g.perfValue<0">
+                {{ g.perfValue>=0?'+':'' }}{{ g.perfValue | number:'1.0-0' }} € ({{ g.perfPercent | number:'1.0-0' }}%)
+                </div>
+            </div>
+            </div>
+
+            <!-- ACTIFS DU GROUPE -->
+            @for (a of g.assets; track $index) {
+            <div class="flex justify-between py-2.5 pl-3 border-b border-[#F1F5F9] last:border-0">
+                <div class="pr-4">
+                <div class="capitalize leading-tight text-[13px]">{{ a.name }}</div>
+                @if(a.reward>0){
+                    <div class="text-[11px] text-green-600/80 mt-0.5">+{{ a.annualGain | number:'1.0-0' }} € / an ({{ a.reward | number:'1.1-1' }}%)</div>
+                }
+                </div>
+                <div class="text-right">
+                <div class="font-mono text-[12px] leading-tight">{{ a.total | number:'1.0-0' }} {{ a.currency }}</div>
+                <div class="text-[11px] mt-0.5" [class.text-green-600]="a.perfValue>=0" [class.text-red-600]="a.perfValue<0">
+                    {{ a.perfValue>=0?'+':'' }}{{ a.perfValue | number:'1.0-0' }} € ({{ a.perfPercent | number:'1.0-0' }}%)
+                </div>
+                </div>
+            </div>
+            }
+        }
         </div>
+
     </div>
     </div>
     `
@@ -74,9 +93,7 @@ export class DashboardComponent {
 
     portfolio = inject(PortfolioService);
     kpis = this.portfolio.kpis;
-    allocationData = computed(() =>
-        this.kpis().exposureByType.map(e => ({ label: e.type, value: e.value }))
-    );
+    allocationData = computed(() => this.kpis().exposureByType);
 
   sheetUrl = signal(this.sheet.currentUrl);
   shareLink = signal('');
